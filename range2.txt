@@ -1,0 +1,25 @@
+   CREATE INDEX import_data_index
+    ON public.term_satis USING btree
+    (satis_hacim ASC NULLS LAST)
+    TABLESPACE pg_default;
+  
+   update search_term
+set
+  range = (select satis_hacim from term_satis 
+							where term_satis.search_term_id=search_term.id order by tarih desc nulls last offset 0 limit 1)
+from term_satis 
+where
+  search_term.id = term_satis.search_term_id
+
+    select 
+    st.term, st.id,
+    st.range hacim
+    from term_product as tp
+    inner join search_term as st on
+    st.id=tp.search_term_id
+    inner join product as p on
+    p.asin=tp.product_asin
+    where tp.product_asin='B0799R1K4V'
+    group by st.term, st.id,
+    st.range order by
+    hacim desc nulls last limit 10 offset 0
